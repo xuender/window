@@ -1,0 +1,37 @@
+<ion-header>
+	<ion-navbar>
+		<ion-title>登录</ion-title>
+	</ion-navbar>
+</ion-header>
+<ion-content text-center padding>
+	<ion-row justify-content-center align-items-center>
+		<ion-col col-12 col-sm-12 col-md-7 col-lg-6 col-xl-4>
+			<h1>登录</h1>
+			<form (ngSubmit)="door.login(user, saveToken)" #loginForm="ngForm">
+				<ion-list inset>
+					<ion-item>
+						<ion-label floating>手机号</ion-label>
+						<ion-input type="text" [(ngModel)]="user.phone" name="phone" pattern="^1\\d{10}$" required></ion-input>
+					</ion-item>
+					<ion-item>
+						<ion-label floating>密码</ion-label>
+						<ion-input type="password" [(ngModel)]="user.password" name="password" pattern="^.{4,300}$" required></ion-input>
+					</ion-item>
+					<ion-item>
+						<ion-label>私人电脑，保存登录状态</ion-label>
+						<ion-checkbox [(ngModel)]="saveToken" name="token"></ion-checkbox>
+					</ion-item>
+				</ion-list>
+				<div padding>
+					<button type="submit" [disabled]="!loginForm.form.valid" ion-button block large>登录</button>
+				</div>
+			</form>
+			<div padding>
+				<button ion-button color="secondary" (click)="register()" outline large>
+					用户注册
+				</button>
+				<button ion-button color="danger" end outline large>找回密码</button>
+			</div>
+		</ion-col>
+	</ion-row>
+</ion-content>
