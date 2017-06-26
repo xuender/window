@@ -47,7 +47,6 @@ func (w *Window) Login(c door.Context) error {
 	if user.CheckPassword(l.Password, c.Num()) {
 		w.userMap.Put(c.Num(), user)
 		c.PutAttribute("isLogin", true)
-		user.SetPassword("")
 		log.Printf("登录成功: %s\n", user.Name)
 		c.Revert(user, door.MethodEnum_PUT, "window", "login")
 	} else {
