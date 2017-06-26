@@ -77,6 +77,6 @@ func createAdmin(db *leveldb.DB) {
 		Phone: "11111111111",
 		Name:  "admin",
 	}
-	user.SetPassword("\300\260y\246\304\310\233\274\351\335\330\262U?\232\321")
+	user.SetPassword("AiyM1C/+nRnucffmWGYHPg==")
 	user.Save(db)
 }
