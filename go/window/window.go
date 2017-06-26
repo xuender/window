@@ -1,6 +1,7 @@
 package window
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -88,8 +89,11 @@ func (w *Window) Init() {
 func (w *Window) Register(c door.Context) error {
 	u := &User{}
 	c.Unmarshal(u)
-	// TODO 验证手机号
-	log.Printf("注册 %v\n", u)
+	u.Load(w.db)
+	if u.Num > 0 {
+		c.Revert(&Msg{Type: MsgEnum_ERROR, Text: "手机号已经注册过."}, door.MethodEnum_POST, "window", "msg")
+		return errors.New(fmt.Sprintf("登录失败: %s", u.Phone))
+	}
 	u.Num = newNum(w.db)
 	u.Save(w.db)
 	c.Revert(u, door.MethodEnum_PUT, "window", "login")

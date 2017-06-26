@@ -20,7 +20,7 @@ func main() {
 	d.DELETE(w.Logout, "window", "login")
 	d.POST(w.Register, "window", "register")
 	d.AddFilter(&door.Inline{Handler: func(c *door.Context) error {
-		isLogin := c.GetAttribute("isLogin")
+		isLogin, _ := c.GetAttribute("isLogin")
 		if isLogin != nil && isLogin.(bool) {
 			return c.Next()
 		}
