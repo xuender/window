@@ -46,7 +46,7 @@ func (w *Window) Login(c door.Context) error {
 	user.Load(w.db)
 	if user.CheckPassword(l.Password, c.Num()) {
 		w.userMap.Put(c.Num(), user)
-		c.PutAttribute("isLogin", true)
+		c.PutAttribute("user", user)
 		log.Printf("登录成功: %s\n", user.Name)
 		c.Revert(user, door.MethodEnum_PUT, "window", "login")
 	} else {
@@ -66,7 +66,7 @@ func (w *Window) Login(c door.Context) error {
 
 // Logout 登出.
 func (w *Window) Logout(c door.Context) error {
-	c.PutAttribute("isLogin", false)
+	c.DelAttribut("user")
 	c.Revert(&Page{
 		Page: "login",
 	}, door.MethodEnum_PUT, "window", "page")
