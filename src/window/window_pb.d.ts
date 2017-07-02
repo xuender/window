@@ -152,9 +152,10 @@ export namespace User {
 }
 
 export enum MsgEnum {
-  INFO = 0,
-  WARN = 1,
-  ERROR = 2,
-  FATAL = 3,
+  TOAST = 0,
+  INFO = 1,
+  WARN = 2,
+  ERROR = 3,
+  FATAL = 4,
 }
 

@@ -1152,10 +1152,11 @@ proto.window.User.prototype.setLastlogin = function(value) {
  * @enum {number}
  */
 proto.window.MsgEnum = {
-  INFO: 0,
-  WARN: 1,
-  ERROR: 2,
-  FATAL: 3
+  TOAST: 0,
+  INFO: 1,
+  WARN: 2,
+  ERROR: 3,
+  FATAL: 4
 };
 
 goog.object.extend(exports, proto.window);
