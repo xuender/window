@@ -7,26 +7,27 @@ import 'rxjs/add/operator/map';
 import Base64 from 'crypto-js/enc-base64';
 import md5 from 'crypto-js/md5';
 
-import { SysInfo, Login, Msg, User, Page } from '../../window_pb';
-import { AlertController } from 'ionic-angular';
+import { SysInfo, Login, Msg, User, Page, MsgEnum } from '../../window_pb';
+import { AlertController, ToastController } from 'ionic-angular';
 import { assign } from '../../utils/pb';
 
 @Injectable()
 export class DoorProvider {
 	private ws: $WebSocket;
-	private door: Door;
 	private openSubject = new Subject<SysInfo.AsObject>()
 	private pageSubject = new Subject<Page.AsObject>()
 	private loginSubject = new Subject<User.AsObject>()
 
-	openObservable = this.openSubject.asObservable();
-	pageObservable = this.pageSubject.asObservable();
-	loginObservable = this.loginSubject.asObservable();
-	sysInfo: SysInfo.AsObject;
-	user: User.AsObject;
+	public door: Door;
+	public openObservable = this.openSubject.asObservable();
+	public pageObservable = this.pageSubject.asObservable();
+	public loginObservable = this.loginSubject.asObservable();
+	public sysInfo: SysInfo.AsObject;
+	public user: User.AsObject;
 	constructor(
-		private lss:LocalStorageService,
-		public alertCtrl: AlertController
+		private lss: LocalStorageService,
+		public alertCtrl: AlertController,
+		public toastCtrl: ToastController
 	) {
 		this.ws = new $WebSocket('ws://localhost:8888/ws');
 		this.door = new Door(this.ws);
@@ -49,8 +50,16 @@ export class DoorProvider {
 		this.ws.onMessage((m: MessageEvent) => this.door.onMessage(m), { autoApply: false });
 	}
 
-	message(msg: Msg.AsObject) {
+	public message(msg: Msg.AsObject) {
 		if (msg) {
+			if (msg.type === MsgEnum.TOAST) {
+				this.toastCtrl.create({
+					message: msg.text,
+					position: 'top',
+					duration: 3000,
+				}).present();
+				return;
+			}
 			this.alertCtrl.create({
 				title: ['提示', '警告', '错误', '致命'][msg.type],
 				subTitle: msg.text,
@@ -59,42 +68,46 @@ export class DoorProvider {
 		}
 	}
 
-	login(user: Login.AsObject, saveToken: boolean) {
+	public login(user: Login.AsObject, saveToken: boolean) {
 		const l = new Login();
 		l.setPhone(user.phone);
-		const p =  Base64.stringify(md5(`window-${user.password}-door`));
+		const p = Base64.stringify(md5(`window-${user.password}-door`));
 		this.lss.clear('token');
 		if (saveToken) {
-			this.lss.store('token',p);
+			this.lss.store('token', p);
 		}
 		l.setPassword(Base64.stringify(md5(`${this.sysInfo.usernum}-${p}`)));
-		this.ws.send(this.door.postBinary(l, 'window', 'login'), WebSocketSendMode.Direct, true);
+		this.send(this.door.postBinary(l, 'window', 'login'));
 	}
 
-	loginForUserNum(): boolean {
+	public loginForUserNum(): boolean {
 		const userNum = this.lss.retrieve('userNum');
 		const token = this.lss.retrieve('token');
 		if (userNum && token) {
 			const l = new Login();
 			l.setUsernum(userNum);
 			l.setPassword(Base64.stringify(md5(`${this.sysInfo.usernum}-${token}`)));
-			this.ws.send(this.door.postBinary(l, 'window', 'login'), WebSocketSendMode.Direct, true);
+			this.send(this.door.postBinary(l, 'window', 'login'));
 			return true;
 		}
 		return false;
 	}
 
-	logout() {
-		this.ws.send(this.door.deleteBinary(null, 'window', 'login'), WebSocketSendMode.Direct, true);
+	public logout() {
+		this.send(this.door.deleteBinary(null, 'window', 'login'));
 		this.lss.clear('token');
 		this.lss.clear('userNum');
 	}
 
-	register(user: User.AsObject) {
+	public register(user: User.AsObject) {
 		const u = new User();
 		assign(u, user);
-		const p =  Base64.stringify(md5(`window-${user.password}-door`));
+		const p = Base64.stringify(md5(`window-${user.password}-door`));
 		u.setPassword(p);
-		this.ws.send(this.door.postBinary(u, 'window', 'register'), WebSocketSendMode.Direct, true);
+		this.send(this.door.postBinary(u, 'window', 'register'));
+	}
+
+	public send(msg: any) {
+		this.ws.send(msg, WebSocketSendMode.Direct, true);
 	}
 }
