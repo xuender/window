@@ -11,25 +11,28 @@ import (
 	"github.com/xuender/goutils"
 )
 
+var user_obj = []byte("U-")
+var user_num = []byte("u-")
+
 // Save 用户保存.
 func (u *User) Save(db *leveldb.DB) {
-	userKey := goutils.PrefixUint32("U-", u.Num)
+	userKey := goutils.PrefixUint32(user_obj, u.Num)
 	userBytes, _ := goutils.Encode(*u)
 	db.Put(userKey, userBytes, nil)
-	db.Put(goutils.PrefixBytes("u-", []byte(u.Phone)), userKey, nil)
+	db.Put(goutils.PrefixBytes(user_num, []byte(u.Phone)), userKey, nil)
 }
 
 // Load 加载用户.
 func (u *User) Load(db *leveldb.DB) {
 	if u.Num > 0 {
-		userKey := goutils.PrefixUint32("U-", u.Num)
+		userKey := goutils.PrefixUint32(user_obj, u.Num)
 		if bs, err := db.Get(userKey, nil); err == nil {
 			goutils.Decode(bs, u)
 		}
 		return
 	}
 	if u.Phone != "" {
-		if userKey, err := db.Get(goutils.PrefixBytes("u-", []byte(u.Phone)), nil); err == nil {
+		if userKey, err := db.Get(goutils.PrefixBytes(user_num, []byte(u.Phone)), nil); err == nil {
 			if bs, err := db.Get(userKey, nil); err == nil {
 				goutils.Decode(bs, u)
 			}
